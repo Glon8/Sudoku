@@ -44,6 +44,52 @@ public class Grid {
         }
     }
 
+    public int[] getCellReference(int index){
+        int[] reference = new int[3];
+
+        int[][] rows = this.toRows();
+        int[][] columns = this.toColumns();
+        int[][] squares = this.toSquares();
+
+        int row_index = 0;
+        int column_index = 0;
+        int square_index = 0;
+
+        int count = 0;
+
+        for (int i = 0; i < rows.length; i++) {
+            for (int g = 0; g < rows.length; g++) {
+                if (rows[i][g] == index) {
+                    row_index = i;
+
+                    count++;
+                }
+
+                if (columns[i][g] == index) {
+                    column_index = i;
+
+                    count++;
+                }
+
+                if (squares[i][g] == index) {
+                    square_index = i;
+
+                    count++;
+                }
+
+                if (count == 3) break;
+            }
+
+            if (count == 3) break;
+        }
+
+        reference[0] = row_index;
+        reference[1] = column_index;
+        reference[2] = square_index;
+
+        return reference;
+    }
+
     public int Length(){
         return arr_length;
     }
@@ -135,8 +181,8 @@ public class Grid {
     }
 
     public void clearGrid() {
-        for (int i : this.grid) {
-            i = 0;
+        for (int i = 0; i < this.grid.length; i++) {
+            this.grid[i] = 0;
         }
     }
 
@@ -154,12 +200,20 @@ public class Grid {
         }
     }
 
+    public int getSqr_root() {
+        return sqr_root;
+    }
+
+    public int getArr_length() {
+        return arr_length;
+    }
+
     @Override
     public String toString() {
         String str = "[\r\n";
 
         for (int i = 0; i < this.arr_length; i++) {
-            str += grid[i] + " ";
+            str += grid[i] + "  ";
             if ((1 + i) % sqr_root == 0) str += "\r\n";
         }
 

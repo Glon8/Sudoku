@@ -1,5 +1,7 @@
 package OnDate2.date14225_sudoku;
 
+import java.util.Random;
+
 public class Main {
     public static void main(String[] args) {
         Grid grid = new Grid(81, true);
@@ -17,18 +19,100 @@ public class Main {
         System.out.println("Squares");
         print(grid, squares);
 
-        System.out.println("The index 60 valid is " + isValid(grid, rows, cols, squares, 60));
+        System.out.println("The index 60 valid is " + isValid_NoValue(grid, 60));
 
-        grid.setPoint(61, 58);
-
-        System.out.println("The index 60 valid is " + isValid(grid, rows, cols, squares, 60));
+        System.out.println("The index 60 valid is " + isValid(grid, 60, 58));
 
         System.out.println(grid);
+
+        sudokuCreate(grid);
     }
 
-    public static boolean isValid(Grid grid, int[][] rows, int[][] columns, int[][] squares, int index) {
-        if (rows == null || squares == null || columns == null || index < 0 || index >= grid.Length())
+    public static void sudokuCreate(Grid grid) {
+        grid.clearGrid();
+
+        int[][] squares = grid.toSquares();
+
+        boolean[] validityForm = new boolean[squares.length];
+
+        boolean breakPoint = false;
+
+        for (int i = 1; i <= 9; i++) {
+            for (int g = 0; g < squares.length; g++) {
+                Random rnd = new Random();
+
+                updateValidity(validityForm, grid, squares[g], i);
+
+                int[] valInd = validityToInt(validityForm);
+
+                System.out.println("number: " + i + "   square: " + g);
+                System.out.println(grid);
+
+                int min = 0;
+                int max = valInd.length;
+
+                if(min != max){
+                int ind = valInd[rnd.nextInt(min, max)];
+
+                grid.setPoint(squares[g][ind],i);
+                }
+                else {
+                    System.out.println("Error: min equals max");
+
+                    breakPoint = true;
+
+                    break;
+                }
+            }
+
+            if (breakPoint) break;
+        }
+    }
+
+    public static int[] validityToInt(boolean[] form) {
+        int[] arr;
+        int length = 0;
+
+        for (int i = 0; i < form.length; i++) length += form[i] == true ? 1 : 0;
+
+        arr = new int[length];
+
+        length = 0;
+
+        for (int i = 0; i < form.length; i++) {
+            if (form[i]) {
+                arr[length] = i;
+
+                length++;
+            }
+        }
+
+        return arr;
+    }
+
+    public static void updateValidity(boolean[] form, Grid grid, int[] arr, int value) {
+        for (int i = 0; i < arr.length; i++) {
+            form[i] = grid.getPoint(arr[i]) == 0 && isValid(grid, arr[i], value);
+        }
+    }
+
+    public static void clearValidity(boolean[] form) {
+        for (int i = 0; i < form.length; i++) form[i] = true;
+    }
+
+    public static void setValidityFalse(boolean[] form, int index) {
+        form[index] = false;
+    }
+
+    public static boolean isValid_NoValue(Grid grid, int index) {
+        if (grid == null || index < 0 || index >= grid.Length())
             return false;
+
+        int[][] rows = grid.toRows();
+        int[][] columns = grid.toColumns();
+        int[][] squares = grid.toSquares();
+
+        int value = grid.getPoint(index);
 
         int row_index = 0;
         int column_index = 0;
@@ -65,45 +149,55 @@ public class Main {
         boolean flag = true;
 
         for (int i = 0; i < rows.length; i++) {
-            int ind = grid.getPoint(rows[row_index][i]);
+            int po = rows[row_index][i];
+            int po2 = columns[column_index][i];
+            int po3 = squares[square_index][i];
 
-            if (ind != 0)
-                for (int g = 0; g < rows.length; g++) {
-                    if(rows[row_index][i] != columns[column_index][g]) flag = ind != grid.getPoint(columns[column_index][g]);
+            int ind = grid.getPoint(po);
+            int ind2 = grid.getPoint(po2);
+            int ind3 = grid.getPoint(po3);
 
-                    if (!flag) break;
-                }
+            if ((ind != 0 && ind == value && po != index) || (ind2 != 0 && ind2 == value && po2 != index) || (ind3 != 0 && ind3 == value && po3 != index)) {
+                flag = false;
 
-            if (!flag) break;
+                break;
+            }
         }
 
-        if (flag)
-            for (int i = 0; i < rows.length; i++) {
-                int ind = grid.getPoint(columns[column_index][i]);
+        return flag;
+    }
 
-                if (ind != 0)
-                    for (int g = 0; g < rows.length; g++) {
-                        if(columns[column_index][i] != squares[square_index][g]) flag = ind != grid.getPoint(squares[square_index][g]);
+    public static boolean isValid(Grid grid, int index, int value) {
+        if (grid == null || index < 0 || index >= grid.Length())
+            return false;
 
-                        if (!flag) break;
-                    }
+        int[] occur = grid.getCellReference(index);
 
-                if (!flag) break;
+        int row_index = occur[0];
+        int column_index = occur[1];
+        int square_index = occur[2];
+
+        int[][] rows = grid.toRows();
+        int[][] columns = grid.toColumns();
+        int[][] squares = grid.toSquares();
+
+        boolean flag = true;
+
+        for (int i = 0; i < rows.length; i++) {
+            int po = rows[row_index][i];
+            int po2 = columns[column_index][i];
+            int po3 = squares[square_index][i];
+
+            int ind = grid.getPoint(po);
+            int ind2 = grid.getPoint(po2);
+            int ind3 = grid.getPoint(po3);
+
+            if ((ind != 0 && ind == value && po != index) || (ind2 != 0 && ind2 == value && po2 != index) || (ind3 != 0 && ind3 == value && po3 != index)) {
+                flag = false;
+
+                break;
             }
-
-        if (flag)
-            for (int i = 0; i < rows.length; i++) {
-                int ind = grid.getPoint(rows[row_index][i]);
-
-                if (ind != 0)
-                    for (int g = 0; g < rows.length; g++) {
-                        if(rows[row_index][i] != squares[square_index][g]) flag = ind != grid.getPoint(squares[square_index][g]);
-
-                        if (!flag) break;
-                    }
-
-                if (!flag) break;
-            }
+        }
 
         return flag;
     }
