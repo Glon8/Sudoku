@@ -94,7 +94,7 @@ public class Grid {
         return arr_length;
     }
 
-    public int[] toZeroList() {
+    public int[] toEmptyCellList() {
         int count  = 0;
 
         for(int i: grid)
