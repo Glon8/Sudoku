@@ -5,7 +5,7 @@ import java.util.Random;
 public class Gene {
     Grid grid;
 
-    public Gene(Grid grid){
+    public Gene(Grid grid) {
         this.grid = grid;
     }
 
@@ -15,48 +15,114 @@ public class Gene {
         for (int i = 1; i <= 9; i++) {
             int[] readyCells = readySquaresCells(i);
 
-            for (int g = 0; g < readyCells.length; g++) if(readyCells[g] != -1) this.grid.setPoint(readyCells[g], i);
+            for (int g = 0; g < readyCells.length; g++) if (readyCells[g] != -1) this.grid.setPoint(readyCells[g], i);
         }
     }
 
     //< returns valid cells for each square, which are suit to place a digit in, which do not intercept with each other on the crossings(row, column, block(square)),
     //   which do not blocking squares from receiving the digit and prioritizing a lonely empty celled squares.
-    public int[] readySquaresCells(int value){
+    public int[] readySquaresCells(int value) {
         if (value == 0) return null; //< won't check if value is zero, science it means empty cell.
 
         int[][] squares = this.grid.toSquares(); //< splitting grid to squares. (sorting indexes by squares)
 
-        int[] squaresIndexes = new int[grid.getSqr_root()]; //< initializing array which ll return the cells for input.
-
-        int length = squaresIndexes.length;
+        int length = squares.length;
 
         boolean[] form = new boolean[length]; //< initializing boolean form for square. (ll be used for validation in the future)
 
         int[][] validIndexes = new int[length][length]; //< creating array to contain all the suitable cells.
 
-        for(int i = 0; i < length; i++){
-            //< grid blocks
-
-            // first check
+        // first check
+        for (int i = 0; i < length; i++) {
             updateBooleanForm(form, squares[i], value); //< running first check on squares, filling by false, boolean form with intercepting crossings. (row, column, block(square))
 
-            // second check
-            updateBooleanFormSecondCheck(form, squares, i); //< running second check on squares, filling by false, boolean form where indexes deny other squares from receiving digits.
-
-            validIndexes[i] = booleanFormToInt(form); //< converting boolean form into "valid" array of indexes, per square.
-
-            // third check
-
+            validIndexes[i] = booleanFormToInt(form); //< converting boolean form into "valid" array of indexes, per square. (*Updating valid indexes)
         }
+
+        int[] squaresIndexes; //< initializing array which ll return the cells for input.
+
+        // second check
+        squaresIndexes = validInterception(grid, validIndexes, value); //< running second check on squares, returning the indexes which 'checked deeply' and have no interceptions and leave space for future cells.
 
         return squaresIndexes;
     }
 
-    public void updateBooleanFormSecondCheck(boolean[] form, int[][] squares, int index){
-     if(form == null || form.length == 0 || squares == null) System.out.println("Error, in 'updateBooleanFormSecondCheck', form or squares are empty!");
-     else {
+    public int[] validInterception(Grid grid, int[][] arr, int value) {
+        if (arr == null || grid == null) {
+            System.out.println("Error 0: 'validInterception'.");
 
-     }
+            return null;
+        }
+
+        int arrLength = arr.length;
+
+        int[] result = new int[arrLength];
+
+        for(int i = 0; i < arrLength; i++){
+            //================================================== point selection
+            Random rnd = new Random();
+
+            int[] dif = difference(0,arr[i].length);
+
+            int ind = dif != null? rnd.nextInt(dif[0], dif[1]) : 0;
+
+            result[i] = arr[i][ind];
+
+            //================================================== position check
+            int[] pos = grid.getCellReference(result[i]);
+
+            int[][] copy = new int[arrLength][1];
+
+            for(int j = 0; j < arrLength; j++) copy[j] = copyArray(arr[j]);
+
+
+
+            //==================================================
+        }
+
+        return result;
+    }
+
+    //< creating copy of array.
+    public int[] copyArray(int[] arr){
+        if(arr == null) return null;
+
+        int[] copy = new int[arr.length];
+
+            for (int i = 0; i < arr.length; i++) {
+                copy[i] = arr[i];
+            }
+
+            return copy;
+    }
+
+    //< removing index from array and updating the given array.
+    public void removeIndexFromArray(int[] arr, int index){
+        if(!(arr.length == 0 || arr == null || index >= arr.length || index < 0)){
+            int[] temp = new int[arr.length - 1];
+
+            int count = 0;
+
+            for(int i = 0; i < arr.length; i++){
+                if(i != index) {
+                    temp[count] = arr[i];
+
+                    count++;
+                }
+            }
+
+            arr = temp;
+        }
+    }
+
+    //< checks validation for min and max. (if all alright returns them as array)
+    public int[] difference(int min, int max){
+        if(min >= max) return null;
+        else{
+            int[] arr = {min, max};
+
+            return arr;
+        }
     }
 
     //< converts boolean array into integer array. (only empty cells are returned in int array)
@@ -110,37 +176,11 @@ public class Gene {
 
         int value = this.grid.getPoint(index);
 
-        int row_index = 0;
-        int column_index = 0;
-        int square_index = 0;
+        int[] occur = this.grid.getCellReference(index);
 
-        int count = 0;
-
-        for (int i = 0; i < rows.length; i++) {
-            for (int g = 0; g < rows.length; g++) {
-                if (rows[i][g] == index) {
-                    row_index = i;
-
-                    count++;
-                }
-
-                if (columns[i][g] == index) {
-                    column_index = i;
-
-                    count++;
-                }
-
-                if (squares[i][g] == index) {
-                    square_index = i;
-
-                    count++;
-                }
-
-                if (count == 3) break;
-            }
-
-            if (count == 3) break;
-        }
+        int row_index = occur[0];
+        int column_index = occur[1];
+        int square_index = occur[2];
 
         boolean flag = true;
 
