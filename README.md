@@ -36,3 +36,15 @@ During the final stage of generation (typically when placing digits **6, 7, 8, a
 ## Status
 
 Development is currently paused due to the unresolved generation logic issue.
+
+# Sudoku (JavaScript) - Experimental Generator
+
+Alongside the original Java implementation, the repository includes a newer prototype built with **React**, **Vite**, **Chakra UI**, and **JavaScript**.
+
+The prototype introduces a fundamentally different generation strategy:
+
+* **Original Java version:** builds the puzzle by placing values one cell at a time.
+* **New JavaScript version:** constructs the board one complete row at a time before proceeding to the next.
+
+This row-oriented approach was created to explore whether generating larger, structured sections of the board can simplify conflict handling and improve the overall generation process.
+
