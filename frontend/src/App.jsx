@@ -114,7 +114,7 @@ function App() {
         </Section>
         <Section rotation={useRot} mt={useRot ? '' : { base: 2, smToMd: 2, md: 3 }} ms={useRot ? { base: 2, smToMd: 2, md: 3 } : ''}>{
           tools?.map((item, ind) => {
-            return (<Square key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
+            return (<Square backgroundColor={item['value'] == 'Edi' && !!useMode || item['value'] == 'Mar' && !useMode ? 'white' : 'red'} key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
           })
         }
         </Section>
