@@ -6,29 +6,67 @@ import Square from './components/Square';
 import Section from './components/Section';
 
 function App() {
-  const [useGrid, setGrid] = useState([
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [10, 11, 12, 13, 14, 15, 16, 17, 18],
-    [19, 20, 21, 22, 23, 24, 25, 26, 27],
-    [28, 29, 30, 31, 32, 33, 34, 35, 36],
-    [37, 38, 39, 40, 41, 42, 43, 44, 45],
-    [46, 47, 48, 49, 50, 51, 52, 53, 54],
-    [55, 56, 57, 58, 59, 60, 61, 62, 63],
-    [64, 65, 66, 67, 68, 69, 70, 71, 72],
-    [73, 74, 75, 76, 77, 78, 79, 80, 81]
-  ]);
+  const debug = true;
 
-  const [useTool, setTool] = useState(['Edi', 'Mar', 'Era']);
+  const isPortrait = window.innerHeight > window.innerWidth;
 
-  const [useBut, setBut] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const [useSC, setSC] = useState(null);
 
-  const isPortrait = window.innerHeight > window.innerWidth
+  const [useMode, setMode] = useState(true);
+
+  const emptyGrid = Array.from({ length: 9 }, (_, X) =>
+    Array.from({ length: 9 }, (_, Y) => ({
+      value: '',
+      position: [X, Y],
+      selected: false,
+    }))
+  );
+
+  const [useGrid, setGrid] = useState(emptyGrid);
 
   const [useRot, setRot] = useState(isPortrait);
 
+  const clearGrid = () => {
+    setSC(null);
+    setGrid(emptyGrid);
+  }
+
+  const setValue = (x, y, label, value) => {
+    setGrid(prev => {
+      const copy = [...prev];
+
+      copy[x] = [...copy[x]];
+      copy[x][y] = {
+        ...copy[x][y],
+        [label]: value
+      };
+
+      if (debug) console.log(copy)
+
+      return copy;
+    });
+  };
+
+  const clearSelection = () => {
+    setValue(useSC[0], useSC[1], 'selected', false);
+    setSC(null);
+  }
+
+  const tools = [
+    { value: 'Edi', onClick: () => setMode(true), },
+    { value: 'Mar', onClick: () => setMode(false), },
+    { value: 'Era', onClick: () => setValue(useSC[0], useSC[1], 'value', ''), },
+    { value: 'Cle', onClick: clearGrid, },
+  ];
+
+  const buttons = Array.from({ length: 9 }, (_, ind) => ({
+    value: ind,
+    onClick: () => setValue(useSC[0], useSC[1], 'value', ind),
+  }));
+
   useEffect(() => {
     setRot(!useRot);
-  }, [isPortrait])
+  }, [isPortrait]);
 
   return (
     <Center w={'100%'} h={'100vh'} flexDir={useRot ? 'row' : 'column'} gap={{ base: 5, smToMd: '1rem', md: '2rem' }}>
@@ -38,30 +76,52 @@ function App() {
         {
           useGrid?.map((rows, ind) => {
             return rows?.map((cell, ind) => {
-              return (<Square key={'posInd' + ind}>{cell}</Square>)
+              return (<Square backgroundColor={cell['selected'] ? 'white' : 'red'} key={'posInd' + ind} onClick={() => {
+                if (debug) console.log('Cell (clicked) possition: (X,Y) ' + useSC?.[0] + ',' + useSC?.[1]);
+
+                if (!cell['selected'] && useSC == null) {
+                  setSC(null);
+                  setSC([...cell['position']]);
+                  setValue(cell['position'][0], cell['position'][1], 'selected', true);
+                }
+                else if (!cell['selected'] && !!useSC && (useSC[0] !== cell['position'][0] || useSC[1] !== cell['position'][1])) {
+                  clearSelection();
+                  setSC([...cell['position']]);
+                  setValue(cell['position'][0], cell['position'][1], 'selected', true);
+                }
+                else if (!!cell['selected'] && !!useSC && useSC[0] == cell['position'][0] && useSC[1] == cell['position'][1]) {
+                  setValue(cell['position'][0], cell['position'][1], 'selected', false);
+                  setSC(null);
+                }
+
+                if (debug) {
+                  console.log('Cell (clicked) selection state: ' + cell['selected']);
+                  console.log('Cell selected right now: (X,Y) ' + useSC);
+                  console.log('Cell (clicked) possition: (X,Y) ' + useSC[0] + ',' + useSC[1]);
+                }
+              }}>{cell['value']}</Square>)
             })
           })
         }
       </SuGrid>
       <Flex flexDir={useRot ? 'row' : 'column'} bg={'blue'} borderRadius={'xl'} p={{ base: 2, smToMd: 2, md: 3 }}>
 
-
         <Section rotation={useRot}>{
-          useTool?.map((item, ind) => {
-            return (<Square key={'toolButtInd' + ind}>{item}</Square>)
+          buttons?.map((item, ind) => {
+            return (<Square key={'buttInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
           })
         }
         </Section>
         <Section rotation={useRot} mt={useRot ? '' : { base: 2, smToMd: 2, md: 3 }} ms={useRot ? { base: 2, smToMd: 2, md: 3 } : ''}>{
-          useBut?.map((item, ind) => {
-            return (<Square orokey={'buttInd' + ind}>{item}</Square>)
+          tools?.map((item, ind) => {
+            return (<Square key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
           })
         }
         </Section>
 
       </Flex>
 
-    </Center>
+    </Center >
   )
 }
 
