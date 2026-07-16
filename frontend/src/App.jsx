@@ -60,8 +60,8 @@ function App() {
   ];
 
   const buttons = Array.from({ length: 9 }, (_, ind) => ({
-    value: ind,
-    onClick: () => setValue(useSC[0], useSC[1], 'value', ind),
+    value: (1 + ind),
+    onClick: () => setValue(useSC[0], useSC[1], 'value', (1 + ind)),
   }));
 
   useEffect(() => {
