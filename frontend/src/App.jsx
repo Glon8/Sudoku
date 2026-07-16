@@ -76,7 +76,7 @@ function App() {
         {
           useGrid?.map((rows, ind) => {
             return rows?.map((cell, ind) => {
-              return (<Square backgroundColor={cell['selected'] ? 'white' : 'red'} key={'posInd' + ind} onClick={() => {
+              return (<Square fontSize={'lg'} fontWeight={'bolder'} backgroundColor={cell['selected'] ? 'white' : 'red'} key={'posInd' + ind} onClick={() => {
                 if (debug) console.log('Cell (clicked) possition: (X,Y) ' + useSC?.[0] + ',' + useSC?.[1]);
 
                 if (!cell['selected'] && useSC == null) {
@@ -108,13 +108,13 @@ function App() {
 
         <Section rotation={useRot}>{
           buttons?.map((item, ind) => {
-            return (<Square key={'buttInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
+            return (<Square fontWeight={'bold'} key={'buttInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
           })
         }
         </Section>
         <Section rotation={useRot} mt={useRot ? '' : { base: 2, smToMd: 2, md: 3 }} ms={useRot ? { base: 2, smToMd: 2, md: 3 } : ''}>{
           tools?.map((item, ind) => {
-            return (<Square backgroundColor={item['value'] == 'Edi' && !!useMode || item['value'] == 'Mar' && !useMode ? 'white' : 'red'} key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
+            return (<Square fontWeight={'bold'} backgroundColor={item['value'] == 'Edi' && !!useMode || item['value'] == 'Mar' && !useMode ? 'white' : 'red'} key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
           })
         }
         </Section>
