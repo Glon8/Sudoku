@@ -52,11 +52,18 @@ function App() {
     setSC(null);
   }
 
+  const lineInsert = (array, ind, newLine) => {
+    if (!Array.isArray(array) || !Array.isArray(newLine) || newLine.length != 9) { if (debug) console.log('Error: Provided list isnt a array or its length is incorrect!'); return null; }
+
+    array[ind] = newLine.map((cell) => ({ ...cell }));
+  }
+
   const tools = [
-    { value: 'Edi', onClick: () => setMode(true), },
-    { value: 'Mar', onClick: () => setMode(false), },
-    { value: 'Era', onClick: () => setValue(useSC[0], useSC[1], 'value', ''), },
-    { value: 'Cle', onClick: clearGrid, },
+    { value: 'Edi', onClick: () => setMode(true) },
+    { value: 'Mar', onClick: () => setMode(false) },
+    { value: 'Era', onClick: () => setValue(useSC[0], useSC[1], 'value', '') },
+    { value: 'Cle', onClick: clearGrid },
+    { value: 'Che', onClick: () => { } },
   ];
 
   const buttons = Array.from({ length: 9 }, (_, ind) => ({
@@ -64,9 +71,65 @@ function App() {
     onClick: () => setValue(useSC[0], useSC[1], 'value', (1 + ind)),
   }));
 
+  const validateGrid = (mode, array) => {
+    if (typeof (mode) != 'number' || !Array.isArray(array)) return false;
+    // mode 0 = grid creation; mode 1 = grid check;
+
+    return true
+  }
+
+  const positionRec = (array) => {
+    const copy = array.map((cell, Y) => ({ ...cell, position: [cell.position[0], Y] }));
+
+    return copy;
+  }
+
+  const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+  const lineCreate = (lineInd) => {
+    if (typeof (lineInd) != 'number') { if (debug) console.log('Error: Line id is not valid!'); return null; }
+
+    const line = Array.from({ length: 9 }, (_, Y) => ({
+      value: (1 + Y),
+      position: [lineInd, Y],
+      selected: false,
+    }));
+
+    shuffle(line);
+
+    return positionRec(line);
+  }
+
+  const lineRecovery = (line) => { }
+
+  const generateGrid = () => {
+    let eteraction = 0;
+    let curLine = 0;
+
+    const newArray = emptyGrid.map((row) => row.map((cell) => ({ ...cell })));
+
+    for (let i = 0; i < 9; i++) {
+      const newLine = lineCreate(i);
+
+      lineRecovery(newLine);
+
+      lineInsert(newArray, i, newLine);
+    }
+
+    return newArray;
+  }
+
   useEffect(() => {
     setRot(!useRot);
   }, [isPortrait]);
+
+  useEffect(() => {
+    const newGrid = generateGrid();
+
+    //const newGrid = removeValues(newGrid);
+
+    setGrid(newGrid);
+  }, []);
 
   return (
     <Center w={'100%'} h={'100vh'} flexDir={useRot ? 'row' : 'column'} gap={{ base: 5, smToMd: '1rem', md: '2rem' }}>
