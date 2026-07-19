@@ -60,15 +60,6 @@ function App() {
     array[ind] = newLine.map((cell) => ({ ...cell }));
   }
 
-  const tools = [
-    { value: (<i className='pi pi-pencil' style={{ fontWeight: 'bold' }}></i>), type: 'edi', onClick: () => setMode(true) },
-    { value: (<i className='pi pi-thumbtack' style={{ fontWeight: 'bold' }}></i>), type: 'mar', onClick: () => setMode(false) },
-    { value: (<i className='pi pi-eraser' style={{ fontWeight: 'bold' }}></i>), type: 'cle', onClick: () => setValue(useSC[0], useSC[1], 'value', '') },
-    { value: (<i className='pi pi-check-circle' style={{ fontWeight: 'bold' }}></i>), type: 'che', onClick: () => { } },
-    { value: (<i className='pi pi-trash' style={{ fontWeight: 'bold' }}></i>), type: 'era', onClick: clearGrid },
-    { value: (<i className='pi pi-refresh' style={{ fontWeight: 'bold' }}></i>), type: 'res', onClick: () => { } },
-  ];
-
   const buttons = Array.from({ length: 9 }, (_, ind) => ({
     value: (1 + ind),
     onClick: () => setValue(useSC[0], useSC[1], 'value', (1 + ind)),
@@ -148,16 +139,29 @@ function App() {
     return newArray;
   }
 
-  useEffect(() => {
-    setRot(!useRot);
-  }, [isPortrait]);
-
-  useEffect(() => {
+  const gridCreation = () => {
     const newGrid = generateGrid();
 
     //const newGrid = removeValues(newGrid);
 
     setGrid(newGrid);
+  }
+
+  const tools = [
+    { value: (<i className='pi pi-pencil' style={{ fontWeight: 'bold' }}></i>), type: 'edi', onClick: () => setMode(true) },
+    { value: (<i className='pi pi-thumbtack' style={{ fontWeight: 'bold' }}></i>), type: 'mar', onClick: () => setMode(false) },
+    { value: (<i className='pi pi-eraser' style={{ fontWeight: 'bold' }}></i>), type: 'cle', onClick: () => setValue(useSC[0], useSC[1], 'value', '') },
+    { value: (<i className='pi pi-check-circle' style={{ fontWeight: 'bold' }}></i>), type: 'che', onClick: () => validateGrid(1, useGrid) },
+    { value: (<i className='pi pi-trash' style={{ fontWeight: 'bold' }}></i>), type: 'era', onClick: clearGrid },
+    { value: (<i className='pi pi-refresh' style={{ fontWeight: 'bold' }}></i>), type: 'res', onClick: gridCreation },
+  ];
+
+  useEffect(() => {
+    setRot(!useRot);
+  }, [isPortrait]);
+
+  useEffect(() => {
+    gridCreation();
   }, []);
 
   return (
