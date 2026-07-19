@@ -192,8 +192,10 @@ function App() {
 
                 if (debug) {
                   console.log('Cell (clicked) selection state: ' + cell['selected']);
-                  console.log('Cell selected right now: (X,Y) ' + useSC);
-                  console.log('Cell (clicked) possition: (X,Y) ' + useSC[0] + ',' + useSC[1]);
+                  if (useSC != null) {
+                    console.log('Cell selected right now: (X,Y) ' + useSC);
+                    console.log('Cell (clicked) possition: (X,Y) ' + useSC[0] + ',' + useSC[1]);
+                  }
                 }
               }}>{cell['value']}</Square>)
             })
