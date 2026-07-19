@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Center, Flex, Grid, Text } from '@chakra-ui/react'
 
+import "primeicons/primeicons.css";
+
 import SuGrid from './components/SuGrid';
 import Square from './components/Square';
 import Section from './components/Section';
@@ -59,11 +61,12 @@ function App() {
   }
 
   const tools = [
-    { value: 'Edi', onClick: () => setMode(true) },
-    { value: 'Mar', onClick: () => setMode(false) },
-    { value: 'Era', onClick: () => setValue(useSC[0], useSC[1], 'value', '') },
-    { value: 'Cle', onClick: clearGrid },
-    { value: 'Che', onClick: () => { } },
+    { value: (<i className='pi pi-pencil' style={{ fontWeight: 'bold' }}></i>), type: 'edi', onClick: () => setMode(true) },
+    { value: (<i className='pi pi-thumbtack' style={{ fontWeight: 'bold' }}></i>), type: 'mar', onClick: () => setMode(false) },
+    { value: (<i className='pi pi-eraser' style={{ fontWeight: 'bold' }}></i>), type: 'cle', onClick: () => setValue(useSC[0], useSC[1], 'value', '') },
+    { value: (<i className='pi pi-check-circle' style={{ fontWeight: 'bold' }}></i>), type: 'che', onClick: () => { } },
+    { value: (<i className='pi pi-trash' style={{ fontWeight: 'bold' }}></i>), type: 'era', onClick: clearGrid },
+    { value: (<i className='pi pi-refresh' style={{ fontWeight: 'bold' }}></i>), type: 'res', onClick: () => { } },
   ];
 
   const buttons = Array.from({ length: 9 }, (_, ind) => ({
@@ -71,11 +74,37 @@ function App() {
     onClick: () => setValue(useSC[0], useSC[1], 'value', (1 + ind)),
   }));
 
+  const valueCheck = (array, row, col, mode) => {
+    if (array[row][col]['value'] == '' && typeof (mode) == 'number' && mode == 1) return false;
+
+    for (let x = 1; x <= 9; x++) {
+      if (array[row][col]['value'] == x || (array[row][col]['value'] == '' && typeof (mode) == 'number' && mode == 0)) return true;
+    }
+
+    return false;
+  }
+
   const validateGrid = (mode, array) => {
     if (typeof (mode) != 'number' || !Array.isArray(array)) return false;
     // mode 0 = grid creation; mode 1 = grid check;
 
-    return true
+    for (let col = 0; col < 9; col++) {
+      let numbers = 9;
+      let sum = 0;
+      for (let row = 0; row < 9; row++) {
+
+        const val = array[row][col]['value'];
+
+        if (!valueCheck(array, row, col, mode)) return false;
+
+        if (array[row][col]['value'] != '' && mode == 0) sum += val;
+        else numbers--;
+
+        if (numbers < 9 && sum >= 81 || numbers == 9 && sum < 81) return false;
+      }
+    }
+
+    return true;
   }
 
   const positionRec = (array) => {
@@ -177,7 +206,7 @@ function App() {
         </Section>
         <Section rotation={useRot} mt={useRot ? '' : { base: 2, smToMd: 2, md: 3 }} ms={useRot ? { base: 2, smToMd: 2, md: 3 } : ''}>{
           tools?.map((item, ind) => {
-            return (<Square fontWeight={'bold'} backgroundColor={item['value'] == 'Edi' && !!useMode || item['value'] == 'Mar' && !useMode ? 'white' : 'red'} key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
+            return (<Square fontWeight={'bold'} backgroundColor={item['type'] == 'edi' && !!useMode || item['type'] == 'mar' && !useMode ? 'white' : 'red'} key={'toolButtInd' + ind} onClick={() => item['onClick']()}>{item['value']}</Square>)
           })
         }
         </Section>
