@@ -48,3 +48,7 @@ The prototype introduces a fundamentally different generation strategy:
 
 This row-oriented approach was created to explore whether generating larger, structured sections of the board can simplify conflict handling and improve the overall generation process.
 
+## Status
+
+Under development.
+
