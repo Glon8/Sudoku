@@ -12,7 +12,7 @@ function App() {
 
   const isPortrait = window.innerHeight > window.innerWidth;
 
-  const [useSC, setSC] = useState(null);
+  const [useSC, setSC] = useState([]);
 
   const [useMode, setMode] = useState(true);
 
@@ -33,13 +33,15 @@ function App() {
     setGrid(emptyGrid);
   }
 
-  const setValue = (x, y, label, value) => {
+  const setValue = (position, label, value) => {
+    if (position.length != 2) { if (debug) console.log('Error: Failed set the value, position values missing or incorrect!'); return false; }
+
     setGrid(prev => {
       const copy = [...prev];
 
-      copy[x] = [...copy[x]];
-      copy[x][y] = {
-        ...copy[x][y],
+      copy[position[0]] = [...copy[position[0]]];
+      copy[position[0]][position[1]] = {
+        ...copy[position[0]][position[1]],
         [label]: value
       };
 
@@ -50,8 +52,8 @@ function App() {
   };
 
   const clearSelection = () => {
-    setValue(useSC[0], useSC[1], 'selected', false);
-    setSC(null);
+    setValue(useSC, 'selected', false);
+    setSC([]);
   }
 
   const lineInsert = (array, ind, newLine) => {
@@ -62,39 +64,35 @@ function App() {
 
   const buttons = Array.from({ length: 9 }, (_, ind) => ({
     value: (1 + ind),
-    onClick: () => setValue(useSC[0], useSC[1], 'value', (1 + ind)),
+    onClick: () => setValue(useSC, 'value', (1 + ind)),
   }));
 
-  const valueCheck = (array, row, col, mode) => {
-    if (array[row][col]['value'] == '' && typeof (mode) == 'number' && mode == 1) return false;
+  const valueCheck = (value, mode) => {
+    if (value == '' && typeof (mode) == 'number' && mode == 1) return false;
 
     for (let x = 1; x <= 9; x++) {
-      if (array[row][col]['value'] == x || (array[row][col]['value'] == '' && typeof (mode) == 'number' && mode == 0)) return true;
+      if (value == x || (value == '' && typeof (mode) == 'number' && mode == 0)) return true;
     }
 
     return false;
   }
 
   const validateGrid = (mode, array) => {
-    if (typeof (mode) != 'number' || !Array.isArray(array)) return false;
+    if (typeof (mode) != 'number' || !Array.isArray(array)) { if (debug) console.log('Error: Failed to validate the grid, provided ivalid mode or array!'); return false; }
     // mode 0 = grid creation; mode 1 = grid check;
-
     for (let col = 0; col < 9; col++) {
-      let numbers = 9;
-      let sum = 0;
+      const blackList = [];
       for (let row = 0; row < 9; row++) {
-
         const val = array[row][col]['value'];
 
-        if (!valueCheck(array, row, col, mode)) return false;
+        if (!valueCheck(val, mode)) { if (debug) console.log('Error: Cell have invalid value!'); return false; }
 
-        if (array[row][col]['value'] != '' && mode == 0) sum += val;
-        else numbers--;
-
-        if (numbers < 9 && sum >= 81 || numbers == 9 && sum < 81) return false;
+        if (val != '') {
+          if (!blackList.includes(val)) blackList.push(val);
+          else { if (debug) console.log('Error: Grid validation failed, values repeated!'); return false; }
+        }
       }
     }
-
     return true;
   }
 
@@ -120,12 +118,11 @@ function App() {
     return positionRec(line);
   }
 
-  const lineRecovery = (line) => { }
+  const lineRecovery = (line) => {
+    
+  }
 
   const generateGrid = () => {
-    let eteraction = 0;
-    let curLine = 0;
-
     const newArray = emptyGrid.map((row) => row.map((cell) => ({ ...cell })));
 
     for (let i = 0; i < 9; i++) {
@@ -150,8 +147,8 @@ function App() {
   const tools = [
     { value: (<i className='pi pi-pencil' style={{ fontWeight: 'bold' }}></i>), type: 'edi', onClick: () => setMode(true) },
     { value: (<i className='pi pi-thumbtack' style={{ fontWeight: 'bold' }}></i>), type: 'mar', onClick: () => setMode(false) },
-    { value: (<i className='pi pi-eraser' style={{ fontWeight: 'bold' }}></i>), type: 'cle', onClick: () => setValue(useSC[0], useSC[1], 'value', '') },
-    { value: (<i className='pi pi-check-circle' style={{ fontWeight: 'bold' }}></i>), type: 'che', onClick: () => validateGrid(1, useGrid) },
+    { value: (<i className='pi pi-eraser' style={{ fontWeight: 'bold' }}></i>), type: 'cle', onClick: () => setValue(useSC, 'value', '') },
+    { value: (<i className='pi pi-check-circle' style={{ fontWeight: 'bold' }}></i>), type: 'che', onClick: () => { console.log('has been clicked'); validateGrid(1, useGrid); } },
     { value: (<i className='pi pi-trash' style={{ fontWeight: 'bold' }}></i>), type: 'era', onClick: clearGrid },
     { value: (<i className='pi pi-refresh' style={{ fontWeight: 'bold' }}></i>), type: 'res', onClick: gridCreation },
   ];
@@ -175,25 +172,25 @@ function App() {
               return (<Square fontSize={'lg'} fontWeight={'bolder'} backgroundColor={cell['selected'] ? 'white' : 'red'} key={'posInd' + ind} onClick={() => {
                 if (debug) console.log('Cell (clicked) possition: (X,Y) ' + useSC?.[0] + ',' + useSC?.[1]);
 
-                if (!cell['selected'] && useSC == null) {
-                  setSC(null);
+                if (!cell['selected'] && useSC.length < 2) {
+                  setSC([]);
                   setSC([...cell['position']]);
-                  setValue(cell['position'][0], cell['position'][1], 'selected', true);
+                  setValue(cell['position'], 'selected', true);
                 }
-                else if (!cell['selected'] && !!useSC && (useSC[0] !== cell['position'][0] || useSC[1] !== cell['position'][1])) {
+                else if (!cell['selected'] && useSC.length == 2 && (useSC[0] !== cell['position'][0] || useSC[1] !== cell['position'][1])) {
                   clearSelection();
                   setSC([...cell['position']]);
-                  setValue(cell['position'][0], cell['position'][1], 'selected', true);
+                  setValue(cell['position'], 'selected', true);
                 }
-                else if (!!cell['selected'] && !!useSC && useSC[0] == cell['position'][0] && useSC[1] == cell['position'][1]) {
-                  setValue(cell['position'][0], cell['position'][1], 'selected', false);
-                  setSC(null);
+                else if (!!cell['selected'] && useSC.length == 2 && useSC[0] == cell['position'][0] && useSC[1] == cell['position'][1]) {
+                  setValue(cell['position'], 'selected', false);
+                  setSC([]);
                 }
 
                 if (debug) {
                   console.log('Cell (clicked) selection state: ' + cell['selected']);
-                  if (useSC != null) {
-                    console.log('Cell selected right now: (X,Y) ' + useSC);
+                  if (useSC.length == 2) {
+                    console.log('Cell selected right now: (X,Y) ' + useSC[0] + ',' + useSC[1]);
                     console.log('Cell (clicked) possition: (X,Y) ' + useSC[0] + ',' + useSC[1]);
                   }
                 }
